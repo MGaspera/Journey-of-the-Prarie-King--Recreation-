@@ -3,11 +3,11 @@ import os
 
 class PlayerInfo():
     def __init__(self):
-        self.x = 50
-        self.y = 50
+        self.x = 0
+        self.y = 0
         self.width = 50
         self.height = 50
-        self.vel = 5
+        self.vel = 0.05
 
 class Anim():
     def __init__(self):
@@ -16,3 +16,5 @@ class Anim():
         self.idle= [pygame.image.load(os.path.join("./Assets/Necro/Idle/", f'Idle ({i}).png')) for i in range(1, 9)]
         self.ult= [pygame.image.load(os.path.join("./Assets/Necro/Ult/", f'Ult ({i}).png')) for i in range(1, 14)]
         self.bg = pygame.image.load(os.path.join("./Assets/Bg", f'Ground.jpg'))
+
+        self.leftIdle = [pygame.transform.flip(image, True, False) for image in self.idle]
