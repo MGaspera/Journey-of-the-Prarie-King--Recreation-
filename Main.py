@@ -2,8 +2,9 @@ import pygame
 from Classes import PlayerInfo, Anim
 pygame.init()
 
-win = pygame.display.set_mode((500, 500), 0, 0)
-
+# Set display dimensions and create the window
+win_width, win_height = 500, 500
+win = pygame.display.set_mode((win_width, win_height))
 pygame.display.set_caption("Journey of the Prarie King")
 
 # Class Instances
@@ -17,7 +18,7 @@ last_update = pygame.time.get_ticks()  # Get the initial time
 walkCount = 0  # Initialize walkCount
 
 right = False
-left = False  # Initialize left to False
+left = False 
 
 # Set boundaries
 screen_width = 500
@@ -74,17 +75,17 @@ while run:
         playerMaths.y += playerMaths.vel
 
     # Boundary checks to prevent the player from going out of the screen
-    if playerMaths.x < 0:
-        playerMaths.x = 0
+    if playerMaths.x < border_width:
+        playerMaths.x = border_width
 
-    if playerMaths.x > screen_width - playerMaths.width:
-        playerMaths.x = screen_width - playerMaths.width
+    if playerMaths.x > win_width - playerMaths.width - border_width:
+        playerMaths.x = win_width - playerMaths.width - border_width
 
-    if playerMaths.y < 0:
-        playerMaths.y = 0
+    if playerMaths.y < border_width:
+        playerMaths.y = border_width
 
-    if playerMaths.y > screen_height - playerMaths.height:
-        playerMaths.y = screen_height - playerMaths.height
+    if playerMaths.y > win_height - playerMaths.height - border_width:
+        playerMaths.y = win_height - playerMaths.height - border_width
 
     # Clear the screen
     win.fill((0, 0, 0))
@@ -93,13 +94,13 @@ while run:
     win.blit(gameAnim.bg, (0, 0))
 
     # Draw rectangles
-    for i in range(0, 1000, 10):
+    for i in range(0, win_width, 10):
         pygame.draw.rect(win, (255, 0, 0), (i, i, 10, 10), 1)
 
     # Blit the player sprite
     win.blit(spriteMain, (playerMaths.x, playerMaths.y))
 
-    print ("coords:", playerMaths.x, playerMaths.y)
+    print("coords:", playerMaths.x, playerMaths.y)
 
     # Update the display
     pygame.display.update()

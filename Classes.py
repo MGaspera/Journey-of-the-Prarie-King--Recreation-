@@ -7,7 +7,7 @@ class PlayerInfo():
         self.y = 0
         self.width = 50
         self.height = 50
-        self.vel = 0.05
+        self.vel = 5
 
 class Anim():
     def __init__(self):
