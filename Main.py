@@ -86,7 +86,22 @@ while run:
     if playerMaths.y > screen_height - playerMaths.height:
         playerMaths.y = screen_height - playerMaths.height
 
+    # Clear the screen
+    win.fill((0, 0, 0))
+
+    # Blit the background
+    win.blit(gameAnim.bg, (0, 0))
+
+    # Draw rectangles
+    for i in range(0, 1000, 10):
+        pygame.draw.rect(win, (255, 0, 0), (i, i, 10, 10), 1)
+
+    # Blit the player sprite
+    win.blit(spriteMain, (playerMaths.x, playerMaths.y))
+
     print ("coords:", playerMaths.x, playerMaths.y)
-    redrawGameWindow()
+
+    # Update the display
+    pygame.display.update()
 
 pygame.quit()
