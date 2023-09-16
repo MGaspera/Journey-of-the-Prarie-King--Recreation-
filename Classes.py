@@ -1,10 +1,7 @@
 import pygame
 import os
-import math
 
-
-
-class player():
+class Player:
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -12,22 +9,20 @@ class player():
         self.height = 50
         self.vel = 0.1
 
-        self.walk= [pygame.image.load(os.path.join("./Assets/Necro/Move/", f'Move-({i}).png')) for i in range(1, 22)]
-        self.death= [pygame.image.load(os.path.join("./Assets/Necro/Death/", f'Death-({i}).png')) for i in range(1, 10)]
-        self.idle= [pygame.image.load(os.path.join("./Assets/Necro/Idle/", f'Idle-({i}).png')) for i in range(1, 9)]
-        self.ult= [pygame.image.load(os.path.join("./Assets/Necro/Ult/", f'Ult-({i}).png')) for i in range(1, 14)]
-
+        self.idle = [pygame.image.load(os.path.join("./Assets/Necro/Idle/", f'Idle-({i}).png')) for i in range(1, 17)]
+        self.death = [pygame.image.load(os.path.join("./Assets/Necro/Death/", f'Death-({i}).png')) for i in range(1, 10)]
+        self.move = [pygame.image.load(os.path.join("./Assets/Necro/Move/", f'Move-({i}).png')) for i in range(1, 9)]
         self.leftIdle = [pygame.transform.flip(image, True, False) for image in self.idle]
 
     def collide(self, spriteGroup):
         if pygame.sprite.spritecollide(self, spriteGroup, False):
             pass
 
-class screen():
+class Screen:
     def __init__(self):
         self.bg = pygame.image.load(os.path.join("./Assets/Bg", f'Ground.jpg'))
 
-class bullet:
+class Bullet:
     LEFT = (-1, 0)
     RIGHT = (1, 0)
     UP = (0, -1)
@@ -38,10 +33,10 @@ class bullet:
         self.y = y
         self.speed = 0.1
         self.direction = direction
-        self.rotation_angle = 0  # Initial rotation angle
-        self.original_image = pygame.Surface((20, 20), pygame.SRCALPHA)  # Create a transparent surface for the bullet
-        pygame.draw.polygon(self.original_image, (99, 10, 4), [(10, 0), (0, 20), (20, 20)])  # Create a triangular bullet
-        self.image = self.original_image
+        self.rotationAngle = 0  # Initial rotation angle
+        self.originalImage = pygame.Surface((20, 20), pygame.SRCALPHA)  # Create a transparent surface for the bullet
+        pygame.draw.polygon(self.originalImage, (200, 10, 4), [(10, 0), (0, 20), (20, 20)])  # Create a triangular bullet
+        self.image = self.originalImage
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
@@ -51,10 +46,10 @@ class bullet:
         self.rect.center = (self.x, self.y)
 
         # Rotate the bullet (you can adjust the rotation speed by changing the angle increment)
-        self.rotation_angle += 0.1  # Adjust the rotation speed here
+        self.rotationAngle += 0.1  # Adjust the rotation speed here
 
         # Rotate the bullet image
-        self.image = pygame.transform.rotate(self.original_image, self.rotation_angle)
+        self.image = pygame.transform.rotate(self.originalImage, self.rotationAngle)
 
     def draw(self, win):
         win.blit(self.image, self.rect)

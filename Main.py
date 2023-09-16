@@ -1,151 +1,182 @@
 import pygame
 import time
-from Classes import screen, player, bullet as Bullet
+from Classes import Screen, Player, Bullet
+
 pygame.init()
 
 win = pygame.display.set_mode((500, 500), 0, 0)
+pygame.display.set_caption("JourneyOfThePrairieKing")
 
-pygame.display.set_caption("Journey of the Prairie King")
-
-# Class Instances
-sprite = player()
-gameScreen = screen()
+# Class instances
+playerSprite = Player()
+gameScreen = Screen()
 
 # Initial sprite and animation variables
-spriteMain = sprite.idle[0]  # Set the initial sprite
-animation_speed = 100  # Speed of animation (milliseconds)
-last_update = pygame.time.get_ticks()  # Get the initial time
+spriteMain = playerSprite.idle[0]  # Set the initial sprite
+animationSpeed = 100  # Speed of animation (milliseconds)
+lastUpdate = pygame.time.get_ticks()  # Get the initial time
 walkCount = 0  # Initialize walkCount
+playerHitbox = pygame.Rect(playerSprite.x + 20, playerSprite.y + 35, playerSprite.width - 10, playerSprite.height - 10)
+playerAnimationState = "idle"  # Initialize playerAnimationState
+
+def createWalls():
+    # Create Rect objects for the walls and store them in variables
+    left = pygame.Rect(0, 0, 10, 500)
+    top = pygame.Rect(0, 0, 500, 10)
+    bottom = pygame.Rect(0, 490, 500, 10)
+    right = pygame.Rect(490, 0, 10, 500)
+
+    return left, top, bottom, right
 
 def redrawGameWindow():
     global walkCount, bullets
     win.blit(gameScreen.bg, (0, 0))  # Blit the background first
 
-    # Draw left border rectangle
-    pygame.draw.rect(win, (84, 80, 69), (0, 0, 10, 500))
-    # Draw top border rectangle
-    pygame.draw.rect(win, (84, 80, 69), (0, 0, 500, 10))
-    # Draw bottom border rectangle
-    pygame.draw.rect(win, (84, 80, 69), (0, 490, 500, 10))
-    # Draw right border rectangle
-    pygame.draw.rect(win, (84, 80, 69), (490, 0, 10, 500))
+    left, top, bottom, right = createWalls()
+
+    pygame.draw.rect(win, (84, 80, 69), left)
+    pygame.draw.rect(win, (84, 80, 69), top)
+    pygame.draw.rect(win, (84, 80, 69), bottom)
+    pygame.draw.rect(win, (84, 80, 69), right)
 
     # Update and draw bullets
     for bullet in bullets:
         bullet.update()  # Update bullet position
         bullet.draw(win)  # Draw bullet on the screen
 
-    playerHitbox = pygame.Rect(sprite.x + 20, sprite.y + 35, sprite.width - 10, sprite.height - 10)
+    playerHitbox = pygame.Rect(playerSprite.x + 20, playerSprite.y + 35, playerSprite.width - 10, playerSprite.height - 10)
     pygame.draw.rect(win, (255, 0, 0), playerHitbox, 2)  # Red outline
-    win.blit(spriteMain, (sprite.x, sprite.y))  # Blit the player sprite
+    win.blit(spriteMain, (playerSprite.x, playerSprite.y))  # Blit the player sprite
     pygame.display.update()  # Update the display
+
+
+def updateAnimation(currentTime):
+    global walkCount, lastUpdate, playerAnimationState, spriteMain
+
+    # Check if it's time to update the animation frame
+    if currentTime - lastUpdate >= animationSpeed:
+        lastUpdate = currentTime
+
+        # Default sprite when not moving
+        spriteMain = playerSprite.idle[walkCount % len(playerSprite.idle)]
+        playerAnimationState = "idle"
+
+        if keys[pygame.K_a]:  # Moving left
+            spriteMain = playerSprite.leftIdle[walkCount % len(playerSprite.leftIdle)]
+            playerAnimationState = "walk"
+        elif keys[pygame.K_d]:  # Moving right
+            spriteMain = playerSprite.move[walkCount % len(playerSprite.move)]
+            playerAnimationState = "walk"
+        elif keys[pygame.K_w] or keys[pygame.K_s]:  # Moving up or down
+            spriteMain = playerSprite.move[walkCount % len(playerSprite.move)]
+            playerAnimationState = "walk"
+
+        # Increment the walkCount for the next frame
+        walkCount += 1
+
+
 
 right = False
 left = False 
 
 # Set boundaries
-screen_width = 500
-screen_height = 500
+screenWidth = 500
+screenHeight = 500
 
-# Define the border width (how close to the edge the player can get)
-border_width = 5  
+# Define the borderWidth (how close to the edge the player can get)
+borderWidth = 5  
 
 # Create a list to store bullets
 bullets = []
 
 lastShotTime = 0
 run = True
+run = True
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
-    # Get the current time
     currentTime = pygame.time.get_ticks()
 
-    # Check if it's time to update the animation frame
-    if currentTime - last_update >= animation_speed:
-        last_update = currentTime
-
-        # Update the animation frame based on the direction (left or right)
-        if right:
-            spriteMain = sprite.idle[walkCount % len(sprite.idle)]
-        elif left:
-            spriteMain = sprite.leftIdle[walkCount % len(sprite.leftIdle)]
-
-        # Increment the walkCount for the next frame
-        walkCount += 1
+    # Calculate the center of the player's hitbox
+    centerX = playerSprite.x + playerSprite.width // 2
+    centerY = playerSprite.y + playerSprite.height // 2
 
     keys = pygame.key.get_pressed()
+    left, top, bottom, right = createWalls()
 
-    # Player movement logic with adjusted boundaries
+    nextX = playerSprite.x
+    nextY = playerSprite.y
+
     if keys[pygame.K_a]:
-        sprite.x -= sprite.vel
-        left = True
-        right = False
-
-    if keys[pygame.K_d]:
-        sprite.x += sprite.vel
-        left = False
-        right = True
+        nextX -= playerSprite.vel
+        playerAnimationState = "walk"
+    elif keys[pygame.K_d]:
+        nextX += playerSprite.vel
+        playerAnimationState = "walk"
 
     if keys[pygame.K_w]:
-        sprite.y -= sprite.vel
+        nextY -= playerSprite.vel
+    elif keys[pygame.K_s]:
+        nextY += playerSprite.vel
 
-    if keys[pygame.K_s]:
-        sprite.y += sprite.vel
+    nextPlayerHitbox = pygame.Rect(nextX + 20, nextY + 35, playerSprite.width - 10, playerSprite.height - 10)
 
-    bullet_direction = (0, 0)
+    if not nextPlayerHitbox.colliderect(left) and not nextPlayerHitbox.colliderect(right):
+        playerSprite.x = nextX
+
+    if not nextPlayerHitbox.colliderect(top) and not nextPlayerHitbox.colliderect(bottom):
+        playerSprite.y = nextY
+
+    if keys[pygame.K_a]:
+        left = True
+        right = False
+    elif keys[pygame.K_d]:
+        left = False
+        right = True
+    else:
+        left = False
+        right = False
+
+    bulletDirection = (0, 0)
 
     if keys[pygame.K_LEFT]:
-        bullet_direction = (-1, 0)  # Move left
+        bulletDirection = (-1, 0)
     elif keys[pygame.K_RIGHT]:
-        bullet_direction = (1, 0)  # Move right
-
+        bulletDirection = (1, 0)
     if keys[pygame.K_UP]:
-        bullet_direction = (0, -1)  # Move up
+        bulletDirection = (0, -1)
     elif keys[pygame.K_DOWN]:
-        bullet_direction = (0, 1)  # Move down
+        bulletDirection = (0, 1)
 
-    # Combine horizontal and vertical directions for diagonal movement
     if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
-        bullet_direction = (-1, -1)  # Move up-left
+        bulletDirection = (-1, -1)
     elif keys[pygame.K_LEFT] and keys[pygame.K_DOWN]:
-        bullet_direction = (-1, 1)  # Move down-left
+        bulletDirection = (-1, 1)
     elif keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
-        bullet_direction = (1, -1)  # Move up-right
+        bulletDirection = (1, -1)
     elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
-        bullet_direction = (1, 1)  # Move down-right
+        bulletDirection = (1, 1)
 
-    # Calculate the time elapsed since the last shot
-    time_since_last_shot = currentTime - lastShotTime
+    timeSinceLastShot = currentTime - lastShotTime
 
-    # If enough time has passed (250 milliseconds) and there's a direction, allow the player to shoot
-    if time_since_last_shot >= 250 and bullet_direction != (0, 0):
-        # Create a new bullet with the current direction
-        new_bullet = Bullet(sprite.x + sprite.width // 2 + 5, sprite.y + sprite.height // 2 + 5, bullet_direction)
-        bullets.append(new_bullet)
-
-        # Update the time of the last shot
+    if timeSinceLastShot >= 250 and bulletDirection != (0, 0):
+        startX = centerX + 10
+        startY = centerY + 20
+        newBullet = Bullet(startX, startY, bulletDirection)
+        bullets.append(newBullet)
         lastShotTime = currentTime
 
-    # Update bullets
-    for bullet in bullets:
-        bullet.update()
+    bullets = [bullet for bullet in bullets if bullet.y > 0]
 
-    # Remove bullets that are out of bounds
-    bullets = [bullet for bullet in bullets if bullet.y > 0]  # Adjust the condition as needed
-
-    # Clear the screen
     win.fill((0, 0, 0))
-
-    # Blit the background
     win.blit(gameScreen.bg, (0, 0))
 
-    # Blit the player sprite
-    win.blit(spriteMain, (sprite.x, sprite.y))
+    # Update the animation
+    updateAnimation(currentTime)
 
-    # Update the display
+    win.blit(spriteMain, (playerSprite.x, playerSprite.y))
     redrawGameWindow()
 
 pygame.quit()
